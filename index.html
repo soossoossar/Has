@@ -1,0 +1,2181 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>تبدیل تصویر و متن به نقاط بریل با سیستم نظرات</title>
+	<link rel="stylesheet" href="">
+<style>
+    /* استایل‌های کلی */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+      color: #333;
+      line-height: 1.6;
+      padding: 20px;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      padding: 25px;
+      margin-bottom: 30px;
+      position: relative;
+      z-index: 10;
+      transition: all 0.3s ease;
+    }
+
+    .comment-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      padding: 25px;
+      position: relative;
+      z-index: 10;
+      transition: all 0.3s ease;
+    }
+
+    h1, h2, h3 {
+      color: #2c3e50;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(90deg, #3498db, #2c3e50);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      padding: 10px;
+      margin-bottom: 30px;
+    }
+
+    /* استایل ناوبری */
+    .nav {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      margin: 0 10px 10px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    .nav-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+    }
+
+    .nav-btn.active {
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+    }
+
+    /* استایل تب‌ها */
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: linear-gradient(135deg, #9b59b6, #8e44ad);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 0 5px 10px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .tab-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(155, 89, 182, 0.3);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* استایل فرم‌ها و کنترل‌ها */
+    .upload-container {
+      border: 3px dashed #3498db;
+      border-radius: 10px;
+      padding: 30px;
+      text-align: center;
+      margin-bottom: 25px;
+      background: #ecf0f1;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .upload-container:hover {
+      background: #d6eaf8;
+      border-color: #2980b9;
+    }
+
+    .upload-icon {
+      font-size: 50px;
+      color: #3498db;
+      margin-bottom: 15px;
+    }
+
+    .control-group {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .slider-container {
+      margin-bottom: 15px;
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 8px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: linear-gradient(90deg, #3498db, #9b59b6);
+      outline: none;
+      border-radius: 4px;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #e74c3c;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    textarea, input[type="text"] {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+      resize: vertical;
+    }
+
+    textarea:focus, input[type="text"]:focus {
+      border-color: #3498db;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+
+    /* استایل دکمه‌ها */
+    .btn {
+      background: linear-gradient(135deg, #2ecc71, #27ae60);
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: inline-block;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+      margin: 5px;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+    }
+
+    .btn-danger:hover {
+      box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+      box-shadow: 0 4px 15px rgba(149, 165, 166, 0.3);
+    }
+
+    .btn-secondary:hover {
+      box-shadow: 0 6px 20px rgba(149, 165, 166, 0.4);
+    }
+
+    .btn:disabled {
+      background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+
+    /* استایل نتیجه */
+    .result-container {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #result {
+      white-space: pre-wrap;
+      font-family: 'Courier New', monospace;
+      line-height: 1.2;
+      text-align: center;
+      padding: 15px;
+      background: white;
+      border-radius: 8px;
+      min-height: 100px;
+      max-height: 500px;
+      overflow: auto;
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* استایل دوربین */
+    #cameraContainer {
+      display: none;
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    #cameraVideo {
+      width: 100%;
+      max-width: 500px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* استایل نظرات */
+    .comment-form {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .comments-list {
+      margin-top: 30px;
+    }
+
+    .comment {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+      transition: transform 0.3s ease;
+    }
+
+    .comment:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .comment-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+
+    .comment-name {
+      font-weight: bold;
+      color: #3498db;
+    }
+
+    .comment-date {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+    }
+
+    .comment-content {
+      margin-bottom: 15px;
+      line-height: 1.6;
+    }
+
+    .comment-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .like-btn {
+      background: none;
+      border: none;
+      color: #7f8c8d;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: color 0.3s ease;
+    }
+
+    .like-btn:hover {
+      color: #e74c3c;
+    }
+
+    .like-btn.liked {
+      color: #e74c3c;
+    }
+
+    .reply-btn {
+      background: none;
+      border: none;
+      color: #3498db;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .reply-btn:hover {
+      text-decoration: underline;
+    }
+
+    .reply-form {
+      margin-top: 15px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .empty-comments {
+      text-align: center;
+      padding: 30px;
+      color: #7f8c8d;
+    }
+
+    .empty-comments i {
+      font-size: 50px;
+      margin-bottom: 15px;
+      color: #bdc3c7;
+    }
+
+    .comment-queued {
+      opacity: 0.7;
+      border-left: 5px solid #f39c12;
+    }
+
+    .error, .success {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .error {
+      background: #ffecec;
+      color: #e74c3c;
+      border: 1px solid #f5b7b1;
+    }
+
+    .success {
+      background: #eafaf1;
+      color: #27ae60;
+      border: 1px solid #a9dfbf;
+    }
+
+    /* استایل اعلان */
+    #notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(46, 204, 113, 0.9);
+      color: white;
+      padding: 15px 25px;
+      border-radius: 50px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      font-weight: 600;
+    }
+
+    /* استایل قلب‌های نئونی */
+    .hearts-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .heart {
+      position: absolute;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ff3250"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>') no-repeat center center;
+      background-size: contain;
+      opacity: 0.7;
+      animation: float 15s linear infinite;
+	  }
+
+	  @keyframes float {
+      0% {
+	  transform: translateY(100vh) rotate(0deg);
+	  opacity: 0.7;
+      }
+      100% {
+	  transform: translateY(-100px) rotate(360deg);
+	  opacity: 0;
+      }
+	  }
+
+	  /* انیمیشن‌ها */
+	  @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+	  }
+
+	  @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+	  }
+
+	  .pulse {
+      animation: pulse 2s infinite;
+	  }
+
+	  /* استایل جدید برای واکنش‌های ایموجی */
+	  .reactions-container {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+	  }
+
+	  .reaction-btn {
+      background: #f0f2f5;
+      border: none;
+      border-radius: 18px;
+      padding: 6px 10px;
+      margin-left: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+	  }
+
+	  .reaction-btn:hover {
+      background: #e4e6eb;
+      transform: scale(1.1);
+	  }
+
+	  .reaction-btn.active {
+      background: #e7f3ff;
+	  }
+
+	  .reaction-emoji {
+      font-size: 16px;
+      margin-left: 4px;
+	  }
+
+	  .reaction-count {
+      font-weight: 600;
+      color: #65676b;
+	  }
+
+	  .reaction-btn.active .reaction-count {
+      color: #1877f2;
+	  }
+
+	  .reactions-panel {
+      display: flex;
+      gap: 5px;
+      margin-top: 8px;
+	  }
+
+	  .emoji-picker {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      padding: 10px;
+      display: flex;
+      gap: 8px;
+      margin-top: 5px;
+	  }
+
+	  .emoji-option {
+      font-size: 20px;
+      cursor: pointer;
+      transition: transform 0.2s;
+      padding: 5px;
+	  }
+
+	  .emoji-option:hover {
+      transform: scale(1.2);
+	  }
+
+	  /* استایل فایل آپلود */
+	  .file-upload-container {
+      border: 2px dashed #3498db;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+      margin-bottom: 15px;
+      background: #ecf0f1;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+	  }
+
+	  .file-upload-container:hover {
+      background: #d6eaf8;
+      border-color: #2980b9;
+	  }
+
+	  .file-upload-preview {
+      max-width: 100%;
+      max-height: 200px;
+      margin-top: 10px;
+      border-radius: 5px;
+      display: none;
+	  }
+
+	  .file-upload-remove {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      background: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 25px;
+      height: 25px;
+      cursor: pointer;
+      display: none;
+	  }
+
+	  .comment-attachment {
+      max-width: 100%;
+      margin-top: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+	  }
+
+	  .comment-video {
+      max-width: 100%;
+      max-height: 300px;
+      margin-top: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+	  }
+
+	  /* استایل برای انواع فایل‌ها */
+	  .file-preview-container {
+      margin-top: 15px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+	  }
+
+	  .file-preview-icon {
+      font-size: 48px;
+      margin-bottom: 10px;
+      color: #3498db;
+	  }
+
+	  .file-preview-name {
+      word-break: break-all;
+      font-size: 14px;
+      margin-bottom: 10px;
+	  }
+
+	  .file-download-btn {
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 5px;
+	  }
+
+	  .file-download-btn:hover {
+      background: linear-gradient(135deg, #2980b9, #3498db);
+	  }
+
+	  /* رسپانسیو */
+	  @media (max-width: 768px) {
+      .container, .comment-container {
+	  padding: 15px;
+      }
+
+      h1 {
+	  font-size: 2rem;
+      }
+
+      .nav-btn, .tab-btn, .btn {
+	  padding: 10px 15px;
+	  font-size: 0.9rem;
+      }
+
+      .btn-group {
+	  flex-direction: column;
+	  align-items: center;
+      }
+
+      .btn {
+	  width: 100%;
+	  margin: 5px 0;
+      }
+
+      .reactions-container {
+	  flex-wrap: wrap;
+      }
+
+      .reaction-btn {
+	  margin-bottom: 5px;
+      }
+	  }
+
+	  /* بارگذاری و انیمیشن‌های جدید */
+	  .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+	  }
+
+	  @keyframes spin {
+      to { transform: rotate(360deg); }
+	  }
+
+	  .fade-in {
+      animation: fadeIn 0.5s;
+	  }
+
+	  .slide-down {
+      animation: slideDown 0.5s;
+	  }
+
+	  @keyframes slideDown {
+      from {
+	  opacity: 0;
+	  transform: translateY(-20px);
+      }
+      to {
+	  opacity: 1;
+	  transform: translateY(0);
+      }
+	  }
+</style>
+  </head>
+  <body>
+	<!-- قلب‌های نئونی -->
+	<div class="hearts-container" id="heartsContainer"></div>
+
+	<!-- اعلان -->
+	<div id="notification"></div>
+
+	<!-- ناوبری اصلی -->
+	<div class="nav">
+	  <button class="nav-btn active" onclick="switchSection('converterSection')">مبدل بریل</button>
+	  <button class="nav-btn" onclick="switchSection('commentsSection')">سیستم نظرات</button>
+	</div>
+
+	<!-- بخش مبدل -->
+	<div id="converterSection" class="container">
+	  <h1><i class="fas fa-blind"></i> تبدیل تصویر و متن به نقاط بریل</h1>
+
+	  <!-- تب‌ها -->
+	  <div class="tabs">
+		<button class="tab-btn active" onclick="switchTab('imageTab')">تبدیل تصویر</button>
+		<button class="tab-btn" onclick="switchTab('textTab')">تبدیل متن</button>
+	  </div>
+
+	  <!-- تب تصویر -->
+	  <div id="imageTab" class="tab-content active">
+		<div class="upload-container" onclick="document.getElementById('imageUpload').click()">
+		  <i class="fas fa-cloud-upload-alt upload-icon"></i>
+		  <p>برای آپلود تصویر کلیک کنید یا آن را اینجا رها کنید</p>
+		  <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+		</div>
+
+		<div class="control-group">
+		  <div class="slider-container">
+			<div class="slider-label">
+			  <span>عرض خروجی:</span>
+			  <span id="widthValue">60</span>
+			</div>
+			<input type="range" id="widthSlider" min="20" max="120" value="60">
+		  </div>
+
+		  <div class="slider-container">
+			<div class="slider-label">
+			  <span>ارتفاع خروجی:</span>
+			  <span id="heightValue">60</span>
+			</div>
+			<input type="range" id="heightSlider" min="20" max="120" value="60">
+		  </div>
+
+		  <div class="slider-container">
+			<div class="slider-label">
+			  <span>آستانه سیاهی:</span>
+			  <span id="thresholdValue">128</span>
+			</div>
+			<input type="range" id="thresholdSlider" min="0" max="255" value="128">
+		  </div>
+
+		  <div class="slider-container">
+			<div class="slider-label">
+			  <span>تراکم نقاط:</span>
+			  <span id="densityValue">1.0</span>
+			</div>
+			<input type="range" id="densitySlider" min="0.5" max="2.0" step="0.1" value="1.0">
+		  </div>
+		</div>
+
+		<div class="btn-group">
+		  <button class="btn btn-primary" onclick="openCamera()"><i class="fas fa-camera"></i> باز کردن دوربین</button>
+		  <button class="btn btn-primary" id="convertBtn" onclick="convertToBraille()"><i class="fas fa-sync-alt"></i> تبدیل تصویر به بریل</button>
+		</div>
+
+		<!-- دوربین -->
+		<div id="cameraContainer">
+		  <video id="cameraVideo" autoplay playsinline></video>
+		  <div class="btn-group">
+			<button class="btn btn-primary" onclick="captureFromCamera()"><i class="fas fa-camera"></i> عکس بگیر</button>
+			<button class="btn btn-danger" onclick="closeCamera()"><i class="fas fa-times"></i> بستن دوربین</button>
+		  </div>
+		</div>
+
+		<div id="cameraPermission" style="display: none; text-align: center; margin: 20px 0;">
+		  <p>برای استفاده از دوربین، لطفاً مجوز دسترسی را تأیید کنید.</p>
+		  <button class="btn btn-primary" onclick="openCamera()"><i class="fas fa-camera"></i> مجدداً تلاش کنید</button>
+		</div>
+	  </div>
+
+	  <!-- تب متن -->
+	  <div id="textTab" class="tab-content">
+		<div class="control-group">
+		  <label for="textInput">متن خود را وارد کنید:</label>
+		  <textarea id="textInput" rows="5" placeholder="متن خود را اینجا وارد کنید..."></textarea>
+		</div>
+
+		<div class="btn-group">
+		  <button class="btn btn-primary" id="convertTextBtn" onclick="convertTextToBraille()"><i class="fas fa-sync-alt"></i> تبدیل متن به بریل</button>
+		</div>
+	  </div>
+
+	  <!-- نتیجه -->
+	  <div class="result-container">
+		<h3>نتیجه تبدیل:</h3>
+		<div id="result"></div>
+		<div class="btn-group">
+		  <button class="btn btn-primary" onclick="copyToClipboard()"><i class="fas fa-copy"></i> کپی به کلیپ‌بورد</button>
+		  <button class="btn btn-secondary" onclick="downloadAsImage()"><i class="fas fa-download"></i> دانلود به عنوان تصویر</button>
+		  <button class="btn btn-secondary" onclick="downloadAsWebP()"><i class="fas fa-download"></i> دانلود به عنوان WebP</button>
+		</div>
+	  </div>
+
+	  <!-- تنظیمات خروجی تصویر -->
+	  <div class="control-group">
+		<h3><i class="fas fa-cog"></i> تنظیمات خروجی تصویر</h3>
+		<div class="slider-container">
+		  <div class="slider-label">
+			<span>عرض تصویر:</span>
+			<span id="imageWidthValue">800</span>
+		  </div>
+		  <input type="range" id="imageWidthSlider" min="400" max="2000" value="800">
+		</div>
+
+		<div class="slider-container">
+		  <div class="slider-label">
+			<span>ارتفاع تصویر:</span>
+			<span id="imageHeightValue">600</span>
+		  </div>
+		  <input type="range" id="imageHeightSlider" min="300" max="2000" value="600">
+		</div>
+
+		<div class="slider-container">
+		  <div class="slider-label">
+			<span>رنگ پس‌زمینه:</span>
+			<input type="color" id="backgroundColorPicker" value="#ffffff">
+		  </div>
+		</div>
+
+		<div class="slider-container">
+		  <label>
+			<input type="checkbox" id="showSignature" checked>
+			نمایش امضا در تصویر خروجی
+		  </label>
+		</div>
+	  </div>
+	</div>
+
+	<!-- بخش نظرات -->
+	<div id="commentsSection" class="comment-container" style="display: none;">
+	  <h1><i class="fas fa-comments"></i> سیستم نظرات</h1>
+
+	  <!-- فرم نظر -->
+	  <div class="comment-form">
+		<h3>ارسال نظر جدید</h3>
+		<div class="form-group">
+		  <label for="name">نام:</label>
+		  <input type="text" id="name" placeholder="نام خود را وارد کنید">
+		</div>
+		<div class="form-group">
+		  <label for="comment">نظر:</label>
+		  <textarea id="comment" rows="4" placeholder="نظر خود را اینجا بنویسید..."></textarea>
+		</div>
+
+		<!-- بخش آپلود فایل - تغییر یافته برای پذیرش همه نوع فایل -->
+		<div class="form-group">
+		  <label>پیوست (اختیاری):</label>
+		  <div class="file-upload-container" onclick="document.getElementById('fileUpload').click()">
+			<i class="fas fa-cloud-upload-alt upload-icon"></i>
+			<p>برای آپلود هر نوع فایل کلیک کنید (تصویر، ویدئو، PDF و ...)</p>
+			<div id="filePreviewContainer" class="file-preview-container" style="display: none;">
+			  <i id="filePreviewIcon" class="file-preview-icon"></i>
+			  <div id="filePreviewName" class="file-preview-name"></div>
+			  <button class="file-upload-remove" onclick="removeFile(event)"><i class="fas fa-times"></i></button>
+			</div>
+			<input type="file" id="fileUpload" accept="*/*" style="display: none;" onchange="handleFileSelect(event)">
+		  </div>
+		</div>
+
+		<div id="replyingTo" style="display: none; margin-bottom: 15px; padding: 10px; background: #eafaf1; border-radius: 5px;">
+		  <span>در پاسخ به <strong id="replyingToName"></strong></span>
+		  <button class="btn btn-secondary" onclick="cancelReply()" style="padding: 2px 8px; font-size: 0.8rem;">لغو</button>
+		</div>
+		<button class="btn btn-primary" id="submit-btn"><i class="fas fa-paper-plane"></i> ارسال نظر</button>
+
+		<div id="error-message" class="error" style="display: none;"></div>
+		<div id="success-message" class="success" style="display: none;"></div>
+	  </div>
+
+	  <!-- لیست نظرات -->
+	  <div class="comments-list" id="comments-list">
+		<div class="empty-comments">
+		  <i class="far fa-comments"></i>
+		  <p>هنوز نظری ارسال نشده است. اولین نفری باشید که نظر می‌دهد!</p>
+		</div>
+	  </div>
+	</div>
+
+<script>
+    // تنظیمات JSONBin.io - افزایش به 6 bin
+    const binConfigs = [
+      { binId: '68ce95e443b1c97be9493e50', apiKey: '$2a$10$19ISCS8Ladk7w6PGR7LYk.Quc7600PMQbUCvTdl7GY18q5AFH2LMi' },
+      { binId: '68ce96c7ae596e708ff4fd4f', apiKey: '$2a$10$.XqD9FlxDRvAgIynVnciHueiHdLaQu6olmV3gG4JFjlSf19gXwh9K' },
+      { binId: '68ce97e543b1c97be949400a', apiKey: '$2a$10$be46l6MIKw04Wf26YIh2FeDglcsIaaH4SMgIGKgvA9fbrr5Hn1RWK' },
+      { binId: '68ce9923d0ea881f408430f5', apiKey: '$2a$10$lM11BrLywsXQtt6S4NvNvuCRO1jRoCRZ30PQaDbf8nYe8B6e0SWJq' },
+      { binId: '68ce99a6ae596e708ff4ffe4', apiKey: '$2a$10$eVJ36sCgwC6/yrispIfrCObm4.KZV2fxJg5f4RnKpomBErB1Jouhi' },
+      { binId: '68ceeb70ae596e708ff539e0', apiKey: '$2a$10$6ssmZ4K6eiH3HqZMSAyX9uI6PrB39Og0.EYSuh.r7Dz1CM2U2UftC' },
+	  { binId: '68cc5c04d0ea881f40826c86', apiKey: '$2a$10$eOHadCSoZhYqN91Yezj33e8UpYnOOOmfHN25iROkx7i7M98LMJvJm' },
+	  { binId: '68c695b7d0ea881f407d7ef0', apiKey: '$2a$10$a9heeTS9rWDJiEndYRuC0OWpQjG1uq63Xwf15X0u5Dc9fw/GmmedC' },
+	  { binId: '68d0e34fae596e708ff6d041', apiKey: '$2a$10$w0MDlnLmiyRb.OR1bjv6jOdID5j7eESRDTSKxO5xldAwVQjmRaJhm' },
+	  {binId : '68d0e399d0ea881f40860485', apikey: '$2a$10$6xqCtH.6LGRzFTFJ8BYr4.BdFHGTNFvd2X/c792nEWqL05oyM7Z8O' }
+    ];
+
+    // متغیر برای ردیابی bin فعال فعلی
+    let currentBinIndex = 0;
+    
+    // تابع برای دریافت تنظیمات bin فعال
+    function getCurrentBinConfig() {
+      return binConfigs[currentBinIndex];
+    }
+    
+    // تابع برای چرخش به bin بعدی در صورت خطا
+    function rotateToNextBin() {
+      currentBinIndex = (currentBinIndex + 1) % binConfigs.length;
+      console.log(`Rotated to bin index: ${currentBinIndex}`);
+    }
+
+    // ایجاد قلب‌های نئونی
+    function createHearts() {
+      const heartsContainer = document.getElementById('heartsContainer');
+      const heartCount = 30;
+      
+      for (let i = 0; i < heartCount; i++) {
+        const heart = document.createElement('div');
+        heart.classList.add('heart');
+        
+        // موقعیت تصادفی
+        const left = Math.random() * 100;
+        const animationDuration = 5 + Math.random() * 10;
+        const animationDelay = Math.random() * 5;
+        const size = 10 + Math.random() * 20;
+        
+        heart.style.left = `${left}%`;
+        heart.style.animationDuration = `${animationDuration}s`;
+        heart.style.animationDelay = `${animationDelay}s`;
+        heart.style.width = `${size}px`;
+        heart.style.height = `${size}px`;
+        
+        heartsContainer.appendChild(heart);
+      }
+    }
+    
+    // نمایش مقادیر اسلایدرها
+    document.getElementById('widthSlider').addEventListener('input', function() {
+      document.getElementById('widthValue').textContent = this.value;
+    });
+    
+    document.getElementById('heightSlider').addEventListener('input', function() {
+      document.getElementById('heightValue').textContent = this.value;
+    });
+    
+    document.getElementById('thresholdSlider').addEventListener('input', function() {
+      document.getElementById('thresholdValue').textContent = this.value;
+    });
+
+    document.getElementById('densitySlider').addEventListener('input', function() {
+      document.getElementById('densityValue').textContent = this.value;
+    });
+    
+    document.getElementById('imageWidthSlider').addEventListener('input', function() {
+      document.getElementById('imageWidthValue').textContent = this.value;
+    });
+    
+    document.getElementById('imageHeightSlider').addEventListener('input', function() {
+      document.getElementById('imageHeightValue').textContent = this.value;
+    });
+
+    // مدیریت آپلود با کشیدن و رها کردن
+    const uploadContainers = document.querySelectorAll('.upload-container');
+    const fileInputs = {
+      'imageUpload': document.getElementById('imageUpload')
+    };
+
+    uploadContainers.forEach((container, index) => {
+      const inputId = Object.keys(fileInputs)[index];
+      
+      container.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        container.style.background = '#d6eaf8';
+        container.style.borderColor = '#2980b9';
+      });
+
+      container.addEventListener('dragleave', () => {
+        container.style.background = '#ecf0f1';
+        container.style.borderColor = '#3498db';
+      });
+
+      container.addEventListener('drop', (e) => {
+        e.preventDefault();
+        container.style.background = '#ecf0f1';
+        container.style.borderColor = '#3498db';
+        
+        if (e.dataTransfer.files.length) {
+          fileInputs[inputId].files = e.dataTransfer.files;
+        }
+      });
+    });
+
+    // نمایش اعلان
+    function showNotification(message) {
+      const notification = document.getElementById('notification');
+      notification.textContent = message;
+      notification.style.opacity = '1';
+      setTimeout(() => {
+        notification.style.opacity = '0';
+      }, 2000);
+    }
+
+    // کپی به کلیپ‌بورد
+    function copyToClipboard() {
+      const resultText = document.getElementById('result').textContent;
+      if (!resultText.trim()) {
+        alert('لطفاً ابتدا یک تصویر یا متن را تبدیل کنید');
+        return;
+      }
+      
+      // ایجاد یک المان موقت برای کپی کردن
+      const textArea = document.createElement('textarea');
+      textArea.value = resultText;
+      document.body.appendChild(textArea);
+      textArea.select();
+      
+      try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+          showNotification('متن با موفقیت کپی شد!');
+        } else {
+          alert('خطا در کپی کردن متن. لطفاً دوباره تلاش کنید.');
+        }
+      } catch (err) {
+        alert('خطا در کپی کردن متن: ' + err);
+      }
+      
+      document.body.removeChild(textArea);
+    }
+
+    // تبدیل به بریل
+    function convertToBraille() {
+      const fileInput = document.getElementById('imageUpload');
+      const widthSlider = document.getElementById('widthSlider');
+      const heightSlider = document.getElementById('heightSlider');
+      const thresholdSlider = document.getElementById('thresholdSlider');
+      const densitySlider = document.getElementById('densitySlider');
+      const resultDiv = document.getElementById('result');
+      const convertBtn = document.getElementById('convertBtn');
+      
+      if (!fileInput.files || !fileInput.files[0]) {
+        alert('لطفاً یک تصویر انتخاب کنید');
+        return;
+      }
+      
+      convertBtn.disabled = true;
+      convertBtn.textContent = 'در حال تبدیل...';
+      
+      const file = fileInput.files[0];
+      const targetWidth = parseInt(widthSlider.value);
+      const targetHeight = parseInt(heightSlider.value);
+      const threshold = parseInt(thresholdSlider.value);
+      const density = parseFloat(densitySlider.value);
+      
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          // محاسبه ابعاد با حفظ نسبت تصویر
+          const aspectRatio = img.height / img.width;
+          const finalWidth = Math.min(targetWidth, 120);
+          const finalHeight = Math.min(targetHeight, Math.floor(finalWidth * aspectRatio * density / 2));
+          
+          // ایجاد کانوس برای پردازش تصویر
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          // تنظیم اندازه کانوس
+          canvas.width = finalWidth;
+          canvas.height = finalHeight * 2; // هر کاراکتر بریل دو نقطه در ارتفاع دارد
+          
+          // رسم تصویر روی کانوس
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          
+          // دریافت داده پیکسل‌ها
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const pixels = imageData.data;
+          
+          // تولید کاراکترهای بریل
+          let brailleArt = '';
+          
+          // هر کاراکتر بریل 2x4 نقطه نمایش می‌دهد
+          for (let y = 0; y < canvas.height; y += 4) {
+            for (let x = 0; x < canvas.width; x += 2) {
+              // محاسبه کد نقطه بریل برای این سلول 2x4
+              let brailleCode = 0;
+              
+              // بررسی هر نقطه در سلول 2x4
+              for (let row = 0; row < 4; row++) {
+                for (let col = 0; col < 2; col++) {
+                  const px = x + col;
+                  const py = y + row;
+                  
+                  // اگر در محدوده کانوس باشد
+                  if (px < canvas.width && py < canvas.height) {
+                    const index = (py * canvas.width + px) * 4;
+                    const r = pixels[index];
+                    const g = pixels[index + 1];
+                    const b = pixels[index + 2];
+                    
+                    // محاسبه روشنایی با فرمول وزندار
+                    const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+                    
+                    // اگر تاریک‌تر از آستانه باشد، نقطه را فعال کن
+                    if (brightness < threshold) {
+                      // تعیین موقعیت نقطه در کاراکتر بریل
+                      let dotPosition;
+                      if (col === 0 && row === 0) dotPosition = 1; // نقطه بالا-چپ
+                      else if (col === 0 && row === 1) dotPosition = 2; // نقطه وسط-چپ
+                      else if (col === 0 && row === 2) dotPosition = 3; // نقطه پایین-چپ
+                      else if (col === 1 && row === 0) dotPosition = 4; // نقطه بالا-راست
+                      else if (col === 1 && row === 1) dotPosition = 5; // نقطه وسط-راست
+                      else if (col === 1 && row === 2) dotPosition = 6; // نقطه پایین-راست
+                      else if (col === 0 && row === 3) dotPosition = 7; // نقطه انتهایی-چپ
+                      else if (col === 1 && row === 3) dotPosition = 8; // نقطه انتهایی-راست
+                      
+                      // فعال کردن بیت مربوطه
+                      if (dotPosition) {
+                        brailleCode |= (1 << (dotPosition - 1));
+                      }
+                    }
+                  }
+                }
+              }
+              
+              // تبدیل کد به کاراکتر بریل
+              // کاراکترهای بریل در یونیکد از 0x2800 شروع می‌شوند
+              brailleArt += String.fromCharCode(0x2800 + brailleCode);
+            }
+            brailleArt += '\n';
+          }
+          
+          // نمایش نتیجه
+          resultDiv.textContent = brailleArt;
+          
+          convertBtn.disabled = false;
+          convertBtn.textContent = 'تبدیل تصویر به بریل';
+        };
+        img.src = e.target.result;
+      };
+      
+      reader.readAsDataURL(file);
+    }
+
+    // تبدیل متن به بریل
+    function convertTextToBraille() {
+      const textInput = document.getElementById('textInput');
+      const widthSlider = document.getElementById('widthSlider');
+      const resultDiv = document.getElementById('result');
+      const convertTextBtn = document.getElementById('convertTextBtn');
+      
+      if (!textInput.value.trim()) {
+        alert('لطفاً متن خود را وارد کنید');
+        return;
+      }
+      
+      convertTextBtn.disabled = true;
+      convertTextBtn.textContent = 'در حال تبدیل...';
+      
+      const text = textInput.value;
+      const targetWidth = parseInt(widthSlider.value);
+      
+      // ایجاد یک کانوس موقت برای پردازش متن
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      // تنظیم اندازه فونت بزرگتر برای کیفیت بهتر
+      const fontSize = 24;
+      ctx.font = `${fontSize}px Arial`;
+      
+      // محاسبه اندازه کانوس مورد نیاز بر اساس ابعاد متن
+      const lines = text.split('\n');
+      let maxLineWidth = 0;
+      
+      for (const line of lines) {
+        const metrics = ctx.measureText(line);
+        if (metrics.width > maxLineWidth) {
+          maxLineWidth = metrics.width;
+        }
+      }
+      
+      canvas.width = Math.min(maxLineWidth + 40, 2000); // محدود کردن حداکثر عرض
+      canvas.height = lines.length * fontSize * 2 + 40;
+      
+      // پس‌زمینه سفید
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // متن سیاه
+      ctx.fillStyle = 'black';
+      ctx.font = `${fontSize}px Arial`;
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'top';
+      
+      // رسم متن روی کانوس
+      for (let i = 0; i < lines.length; i++) {
+        ctx.fillText(lines[i], canvas.width - 20, i * fontSize * 1.5 + 20);
+      }
+      
+      // پردازش کانوس مانند یک تصویر
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const pixels = imageData.data;
+      
+      // تولید کاراکترهای بریل
+      let brailleArt = '';
+      
+      // هر کاراکتر بریل 2x4 نقطه نمایش می‌دهد
+      for (let y = 0; y < canvas.height; y += 4) {
+        for (let x = 0; x < canvas.width; x += 2) {
+          // محاسبه کد نقطه بریل برای این سلول 2x4
+          let brailleCode = 0;
+          
+          // بررسی هر نقطه در سلول 2x4
+          for (let row = 0; row < 4; row++) {
+            for (let col = 0; col < 2; col++) {
+              const px = x + col;
+              const py = y + row;
+              
+              // اگر در محدوده کانوس باشد
+              if (px < canvas.width && py < canvas.height) {
+                const index = (py * canvas.width + px) * 4;
+                const r = pixels[index];
+                const g = pixels[index + 1];
+                const b = pixels[index + 2];
+                
+                // محاسبه روشنایی با فرمول وزندار
+                const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+                
+                // اگر تاریک‌تر از آستانه باشد، نقطه را فعال کن
+                if (brightness < 200) { // آستانه ثابت برای متن
+                  // تعیین موقعیت نقطه در کاراکتر بریل
+                  let dotPosition;
+                  if (col === 0 && row === 0) dotPosition = 1; // نقطه بالا-چپ
+                  else if (col === 0 && row === 1) dotPosition = 2; // نقطه وسط-چپ
+                  else if (col === 0 && row === 2) dotPosition = 3; // نقطه پایین-چپ
+                  else if (col === 1 && row === 0) dotPosition = 4; // نقطه بالا-راست
+                  else if (col === 1 && row === 1) dotPosition = 5; // نقطه وسط-راست
+                  else if (col === 1 && row === 2) dotPosition = 6; // نقطه پایین-راست
+                  else if (col === 0 && row === 3) dotPosition = 7; // نقطه انتهایی-چپ
+                  else if (col === 1 && row === 3) dotPosition = 8; // نقطه انتهایی-راست
+                  
+                  // فعال کردن بIT مربوطه
+                  if (dotPosition) {
+                    brailleCode |= (1 << (dotPosition - 1));
+                  }
+                }
+              }
+            }
+          }
+          
+          // تبدیل کد به کاراکتر بریل
+          brailleArt += String.fromCharCode(0x2800 + brailleCode);
+        }
+        brailleArt += '\n';
+      }
+      
+      // نمایش نتیجه
+      resultDiv.textContent = brailleArt;
+      
+      convertTextBtn.disabled = false;
+      convertTextBtn.textContent = 'تبدیل متن به بریل';
+    }
+
+    // دانلود به عنوان تصویر
+    async function downloadAsImage() {
+      const resultDiv = document.getElementById('result');
+      if (!resultDiv.textContent.trim()) {
+        alert('لطفاً ابتدا یک تصویر یا متن را تبدیل کنید');
+        return;
+      }
+      
+      // دریافت مقادیر از اسلایدرها و انتخابگر رنگ
+      const imageWidth = parseInt(document.getElementById('imageWidthSlider').value);
+      const imageHeight = parseInt(document.getElementById('imageHeightSlider').value);
+      const backgroundColor = document.getElementById('backgroundColorPicker').value;
+      const showSignature = document.getElementById('showSignature').checked;
+      
+      // ایجاد یک کانوس برای تبدیل متن بریل به تصویر
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      // محاسبه ابعاد کانوس بر اساس تعداد کاراکترها و خطوط
+      const lines = resultDiv.textContent.split('\n');
+      const lineCount = lines.length;
+      const maxChars = Math.max(...lines.map(line => line.length));
+      
+      // اندازه هر کاراکتر بریل در تصویر
+      const charWidth = 20;
+      const charHeight = 30;
+      
+      // اضافه کردن حاشیه/پدینگ (50 پیکسل در هر طرف)
+      const borderSize = 50;
+      
+      canvas.width = imageWidth;
+      canvas.height = imageHeight;
+      
+      // پس‌زمینه سفید با حاشیه
+      ctx.fillStyle = backgroundColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // رسم حاشیه
+      ctx.strokeStyle = '#3498db';
+      ctx.lineWidth = 5;
+      ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+      
+      // محاسبه مقیاس برای جا دادن متن بریل در کانوس
+      const requiredWidth = maxChars * charWidth + borderSize * 2;
+      const requiredHeight = lineCount * charHeight + borderSize * 2;
+      
+      // فاکتور مقیاس برای جا دادن متن در کانوس
+      const scale = Math.min(canvas.width / requiredWidth, canvas.height / requiredHeight);
+      const scaledCharWidth = charWidth * scale;
+      const scaledCharHeight = charHeight * scale;
+      
+      // محاسبه موقعیت شروع برای居中 کردن متن
+      const startX = (canvas.width - (maxChars * scaledCharWidth)) / 2;
+      const startY = (canvas.height - (lineCount * scaledCharHeight)) / 2;
+      
+      // متن سیاه
+      ctx.fillStyle = 'black';
+      ctx.font = `${scaledCharHeight}px 'Courier New', monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      // رسم هر خط از متن بریل
+      for (let i = 0; i < lineCount; i++) {
+        const line = lines[i];
+        for (let j = 0; j < line.length; j++) {
+          const char = line[j];
+          ctx.fillText(char, startX + j * scaledCharWidth + scaledCharWidth/2, startY + i * scaledCharHeight + scaledCharHeight/2);
+        }
+      }
+      
+      // اضافه کردن تاریخ و زمان
+      const now = new Date();
+      const dateTimeString = now.toLocaleString('fa-IR');
+      
+      ctx.font = '16px Arial';
+      ctx.fillStyle = '#666';
+      ctx.textAlign = 'left';
+      ctx.fillText(dateTimeString, borderSize, 25);
+      
+      // اضافه کردن واترمارک
+      ctx.textAlign = 'right';
+      ctx.fillText('ساخته شده با مبدل بریل', canvas.width - borderSize, 25);
+      
+      // اضافه کردن امضا اگر فعال باشد
+      if (showSignature) {
+        try {
+          const signatureImg = await loadImage('https://raw.githubusercontent.com/bandannaban/G/main/f48277e66b20b3431c6a118bc2cef4fe.png');
+          const signatureWidth = 100;
+          const signatureHeight = (signatureImg.height / signatureImg.width) * signatureWidth;
+          ctx.drawImage(signatureImg, 20, canvas.height - signatureHeight - 20, signatureWidth, signatureHeight);
+        } catch (error) {
+          console.error('خطا در بارگذاری امضا:', error);
+        }
+      }
+      
+      // ایجاد لینک دانلود
+      const link = document.createElement('a');
+      link.download = 'braille-art-' + now.getTime() + '.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      
+      showNotification('تصویر با موفقیت دانلود شد!');
+    }
+
+    // دانلود به عنوان WebP بدون پس‌زمینه
+    function downloadAsWebP() {
+      const resultDiv = document.getElementById('result');
+      if (!resultDiv.textContent.trim()) {
+        alert('لطفاً ابتدا یک تصویر یا متن را تبدیل کنید');
+        return;
+      }
+      
+      // ایجاد یک کانوس برای تبدیل متن بریل به تصویر
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      // محاسبه ابعاد کانوس بر اساس تعداد کاراکترها و خطوط
+      const lines = resultDiv.textContent.split('\n');
+      const lineCount = lines.length;
+      const maxChars = Math.max(...lines.map(line => line.length));
+      
+      // اندازه هر کاراکتر بریل در تصویر
+      const charWidth = 20;
+      const charHeight = 30;
+      
+      // اضافه کردن حاشیه (20 پیکسل در هر طرف)
+      const borderSize = 20;
+      
+      canvas.width = maxChars * charWidth + borderSize * 2;
+      canvas.height = lineCount * charHeight + borderSize * 2;
+      
+      // پس‌زمینه شفاف
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // متن سیاه
+      ctx.fillStyle = 'black';
+      ctx.font = `${charHeight}px 'Courier New', monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      // محاسبه موقعیت شروع برای居中 کردن متن
+      const startX = borderSize + charWidth/2;
+      const startY = borderSize + charHeight/2;
+      
+      // رسم هر خط از متن بریل
+      for (let i = 0; i < lineCount; i++) {
+        const line = lines[i];
+        for (let j = 0; j < line.length; j++) {
+          const char = line[j];
+          ctx.fillText(char, startX + j * charWidth, startY + i * charHeight);
+        }
+      }
+      
+      // بررسی پشتیبانی از فرمت WebP
+      if (!canvas.toDataURL('image/webp').includes('data:image/webp')) {
+        alert('مرورگر شما از فرمت WebP پشتیبانی نمی‌کند. لطفاً از مرورگر مدرن‌تری استفاده کنید.');
+        return;
+      }
+      
+      // ایجاد لینک دانلود
+      const now = new Date();
+      const link = document.createElement('a');
+      link.download = 'braille-art-' + now.getTime() + '.webp';
+      link.href = canvas.toDataURL('image/webp');
+      link.click();
+      
+      showNotification('تصویر WebP با موفقیت دانلود شد!');
+    }
+
+    // تابع کمکی برای بارگذاری تصویر
+    function loadImage(url) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = url;
+      });
+    }
+
+    // تعویض تب
+    function switchTab(tabId) {
+      // غیرفعال کردن همه تب‌ها
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // فعال کردن تب انتخاب شده
+      document.getElementById(tabId).classList.add('active');
+      event.currentTarget.classList.add('active');
+    }
+
+    // تعویض بخش
+    function switchSection(sectionId) {
+      // غیرفعال کردن همه بخش‌ها
+      document.querySelectorAll('.container, .comment-container').forEach(section => {
+        section.style.display = 'none';
+      });
+      
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // فعال کردن بخش انتخاب شده
+      document.getElementById(sectionId).style.display = 'block';
+      event.currentTarget.classList.add('active');
+    }
+
+    // توابع دوربین
+    let cameraStream = null;
+
+    async function openCamera() {
+      const cameraContainer = document.getElementById('cameraContainer');
+      const cameraVideo = document.getElementById('cameraVideo');
+      const cameraPermission = document.getElementById('cameraPermission');
+      
+      try {
+        // درخواست دسترسی به دوربین
+        cameraStream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            facingMode: 'environment' // استفاده از دوربین پشتی
+          } 
+        });
+        cameraVideo.srcObject = cameraStream;
+        cameraContainer.style.display = 'block';
+        cameraPermission.style.display = 'none';
+      } catch (error) {
+        console.error('خطا در دسترسی به دوربین:', error);
+        cameraPermission.style.display = 'block';
+        alert('دسترسی به دوربین ممکن نیست. لطفاً مطمئن شوید که دوربین شما فعال است و مجوزهای لازم را داده‌اید.');
+      }
+    }
+
+    function closeCamera() {
+      const cameraContainer = document.getElementById('cameraContainer');
+      cameraContainer.style.display = 'none';
+      
+      // توقف جریان دوربین
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+      }
+    }
+
+    function captureFromCamera() {
+      const cameraVideo = document.getElementById('cameraVideo');
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      // تنظیم ابعاد کانوس به ابعاد ویدیو
+      canvas.width = cameraVideo.videoWidth;
+      canvas.height = cameraVideo.videoHeight;
+      
+      // رسم فریم فعلی ویدیو روی کانوس
+      ctx.drawImage(cameraVideo, 0, 0, canvas.width, canvas.height);
+      
+      // تبدیل کانوس به تصویر و تنظیم به عنوان فایل ورودی
+      canvas.toBlob(function(blob) {
+        const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        document.getElementById('imageUpload').files = dataTransfer.files;
+        
+        // مخفی کردن دوربین
+        closeCamera();
+        
+        showNotification('عکس با موفقیت گرفته شد! اکنون می‌توانید آن را تبدیل کنید.');
+      }, 'image/jpeg');
+    }
+
+    // سیستم نظرات - بخش اصلی تغییرات
+    // المنت های DOM
+    const nameInput = document.getElementById('name');
+    const commentInput = document.getElementById('comment');
+    const submitBtn = document.getElementById('submit-btn');
+    const commentsList = document.getElementById('comments-list');
+    const errorMessage = document.getElementById('error-message');
+    const successMessage = document.getElementById('success-message');
+    const replyingTo = document.getElementById('replyingTo');
+    const replyingToName = document.getElementById('replyingToName');
+    const fileUpload = document.getElementById('fileUpload');
+    const filePreviewContainer = document.getElementById('filePreviewContainer');
+    const filePreviewIcon = document.getElementById('filePreviewIcon');
+    const filePreviewName = document.getElementById('filePreviewName');
+    const fileUploadRemove = document.querySelector('.file-upload-remove');
+    
+    // متغیرهای مدیریت نظرات و واکنش‌ها
+    let commentsData = [];
+    let userReactions = JSON.parse(localStorage.getItem('userReactions')) || {};
+    let replyToId = null;
+    let selectedFile = null;
+    
+    // ایموجی‌های موجود برای واکنش
+    const availableEmojis = ['👍', '❤️', '😂', '😮', '😢', '😡', '👎'];
+    
+    // نقشه انواع فایل‌ها به آیکون‌ها
+    const fileTypeIcons = {
+      'image': 'far fa-file-image',
+      'video': 'far fa-file-video',
+      'audio': 'far fa-file-audio',
+      'pdf': 'far fa-file-pdf',
+      'word': 'far fa-file-word',
+      'excel': 'far fa-file-excel',
+      'powerpoint': 'far fa-file-powerpoint',
+      'archive': 'far fa-file-archive',
+      'code': 'far fa-file-code',
+      'text': 'far fa-file-alt',
+      'default': 'far fa-file'
+    };
+    
+    // مدیریت انتخاب فایل - تغییر یافته برای پذیرش همه نوع فایل
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      // افزایش محدودیت حجم فایل به 5MB
+      if (file.size > 5 * 1024 * 1024) {
+        showCommentError('حجم فایل باید کمتر از ۵ مگابایت باشد.');
+        event.target.value = '';
+        return;
+      }
+      
+      selectedFile = file;
+      
+      // نمایش پیش‌نمایش فایل
+      const fileType = getFileType(file.type);
+      filePreviewIcon.className = fileTypeIcons[fileType] || fileTypeIcons.default;
+      filePreviewName.textContent = file.name;
+      filePreviewContainer.style.display = 'block';
+      fileUploadRemove.style.display = 'block';
+    }
+    
+    // تعیین نوع فایل بر اساس MIME type
+    function getFileType(mimeType) {
+      if (mimeType.startsWith('image/')) return 'image';
+      if (mimeType.startsWith('video/')) return 'video';
+      if (mimeType.startsWith('audio/')) return 'audio';
+      if (mimeType === 'application/pdf') return 'pdf';
+      if (mimeType === 'application/msword' || mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') return 'word';
+      if (mimeType === 'application/vnd.ms-excel' || mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') return 'excel';
+      if (mimeType === 'application/vnd.ms-powerpoint' || mimeType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation') return 'powerpoint';
+      if (mimeType === 'application/zip' || mimeType === 'application/x-rar-compressed') return 'archive';
+      if (mimeType.startsWith('text/') || mimeType === 'application/javascript' || mimeType === 'application/json') return 'code';
+      return 'default';
+    }
+    
+    // حذف فایل انتخاب شده
+    function removeFile(event) {
+      event.stopPropagation();
+      selectedFile = null;
+      fileUpload.value = '';
+      filePreviewContainer.style.display = 'none';
+      fileUploadRemove.style.display = 'none';
+    }
+    
+    // رویداد کلیک برای دکمه ارسال
+    submitBtn.addEventListener('click', async () => {
+      const name = nameInput.value.trim();
+      const commentText = commentInput.value.trim();
+      
+      // اعتبارسنجی
+      if (!name || !commentText) {
+        showCommentError('لطفاً نام و نظر خود را وارد کنید.');
+        return;
+      }
+      
+      if (name.length < 2) {
+        showCommentError('نام باید حداقل ۲ حرف باشد.');
+        return;
+      }
+      
+      if (commentText.length < 10) {
+        showCommentError('نظر باید حداقل ۱۰ حرف باشد.');
+        return;
+      }
+      
+      // غیرفعال کردن دکمه ارسال برای جلوگیری از ارسال تکراری
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'در حال ارسال...';
+      
+      try {
+        let fileBase64 = null;
+        let fileName = null;
+        let fileType = null;
+        
+        // اگر فایلی انتخاب شده، آن را به base64 تبدیل کن
+        if (selectedFile) {
+          fileBase64 = await toBase64(selectedFile);
+          fileName = selectedFile.name;
+          fileType = selectedFile.type;
+        }
+        
+        // ایجاد نظر جدید
+        const comment = {
+          id: Date.now(),
+          parentId: replyToId,
+          name,
+          comment: commentText,
+          timestamp: new Date().toISOString(),
+          reactions: {}, // شیء برای ذخیره واکنش‌ها
+          file: fileBase64, // ذخیره فایل به صورت base64
+          fileName: fileName, // نام فایل
+          fileType: fileType // نوع فایل
+        };
+        
+        // ارسال نظر به سرور
+        await addCommentToServer(comment);
+        
+        // پاک کردن فرم
+        nameInput.value = '';
+        commentInput.value = '';
+        removeFile({ stopPropagation: () => {} }); // پاک کردن فایل
+        cancelReply();
+        
+        // نمایش پیام موفقیت
+        showCommentSuccess('نظر شما با موفقیت ارسال شد!');
+        
+      } catch (error) {
+        showCommentError('خطا در ارسال نظر: ' + error.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'ارسال نظر';
+      }
+    });
+    
+    // تبدیل فایل به base64
+    function toBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+    }
+    
+    // تابع برای پاسخ به نظر
+    function replyToComment(commentId, commentName) {
+      replyToId = commentId;
+      replyingToName.textContent = commentName;
+      replyingTo.style.display = 'block';
+      commentInput.focus();
+    }
+    
+    // تابع برای لغو پاسخ
+    function cancelReply() {
+      replyToId = null;
+      replyingTo.style.display = 'none';
+    }
+    
+    // تابع برای افزودن نظر به سرور
+    async function addCommentToServer(comment) {
+      try {
+        // ذخیره نظر در تمام binها
+        for (let i = 0; i < binConfigs.length; i++) {
+          try {
+            const config = binConfigs[i];
+            if (!config.binId || !config.apiKey) continue;
+            
+            const apiUrl = `https://api.jsonbin.io/v3/b/${config.binId}`;
+            
+            // دریافت داده‌های فعلی از سرور
+            const response = await fetch(apiUrl, {
+              headers: {
+                'X-Master-Key': config.apiKey
+              }
+            });
+            
+            if (!response.ok) {
+              throw new Error('خطا در دریافت داده‌ها از سرور');
+            }
+            
+            const data = await response.json();
+            const currentData = data.record || { comments: [] };
+            
+            // افزودن نظر جدید به ابتدای لیست
+            currentData.comments = [comment, ...currentData.comments];
+            
+            // به‌روزرسانی Bin
+            const updateResponse = await fetch(apiUrl, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': config.apiKey
+              },
+              body: JSON.stringify(currentData)
+            });
+            
+            if (!updateResponse.ok) {
+              throw new Error('خطا در ارسال داده‌ها به سرور');
+            }
+            
+            console.log(`نظر با موفقیت در bin ${i} ذخیره شد`);
+            
+          } catch (error) {
+            console.error(`خطا در ذخیره نظر در bin ${i}:`, error);
+            // ادامه به bin بعدی در صورت خطا
+          }
+        }
+        
+        // بارگذاری مجدد نظرات
+        await loadComments();
+        
+      } catch (error) {
+        throw new Error('خطا در ارسال نظر: ' + error.message);
+      }
+    }
+    
+    // تابع برای افزودن واکنش به نظر
+    async function addReaction(commentId, emoji) {
+      try {
+        // بررسی آیا کاربر قبلاً به این نظر واکنش داده است
+        const userReaction = userReactions[commentId];
+        
+        // ذخیره واکنش در تمام binها
+        for (let i = 0; i < binConfigs.length; i++) {
+          try {
+            const config = binConfigs[i];
+            if (!config.binId || !config.apiKey) continue;
+            
+            const apiUrl = `https://api.jsonbin.io/v3/b/${config.binId}`;
+            
+            // دریافت داده‌های فعلی از سرور
+            const response = await fetch(apiUrl, {
+              headers: {
+                'X-Master-Key': config.apiKey
+              }
+            });
+            
+            if (!response.ok) {
+              throw new Error('خطا در دریافت داده‌ها از سرور');
+            }
+            
+            const data = await response.json();
+            const currentData = data.record || { comments: [] };
+            
+            // پیدا کردن نظر مورد نظر
+            const commentIndex = currentData.comments.findIndex(c => c.id === commentId);
+            if (commentIndex === -1) {
+              continue; // نظر در این bin پیدا نشد، ادامه به bin بعدی
+            }
+            
+            const comment = currentData.comments[commentIndex];
+            
+            // مقداردهی اولیه شیء reactions اگر وجود ندارد
+            if (!comment.reactions) {
+              comment.reactions = {};
+            }
+            
+            // اگر کاربر قبلاً به این نظر واکنش داده است
+            if (userReaction) {
+              // اگر همان ایموجی را انتخاب کرده، واکنش را حذف کن
+              if (userReaction === emoji) {
+                comment.reactions[emoji] = (comment.reactions[emoji] || 1) - 1;
+                if (comment.reactions[emoji] <= 0) {
+                  delete comment.reactions[emoji];
+                }
+                delete userReactions[commentId];
+              } else {
+                // اگر ایموجی متفاوتی انتخاب کرده، ایموجی قبلی را کم کن و ایموجی جدید را اضافه کن
+                comment.reactions[userReaction] = (comment.reactions[userReaction] || 1) - 1;
+                if (comment.reactions[userReaction] <= 0) {
+                  delete comment.reactions[userReaction];
+                }
+                
+                comment.reactions[emoji] = (comment.reactions[emoji] || 0) + 1;
+                userReactions[commentId] = emoji;
+              }
+            } else {
+              // اگر کاربر قبلاً واکنش نداده، واکنش جدید اضافه کن
+              comment.reactions[emoji] = (comment.reactions[emoji] || 0) + 1;
+              userReactions[commentId] = emoji;
+            }
+            
+            // ذخیره واکنش‌های کاربر در localStorage
+            localStorage.setItem('userReactions', JSON.stringify(userReactions));
+            
+            // به‌روزرسانی Bin
+            const updateResponse = await fetch(apiUrl, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': config.apiKey
+              },
+              body: JSON.stringify(currentData)
+            });
+            
+            if (!updateResponse.ok) {
+              throw new Error('خطا در ارسال داده‌ها به سرور');
+            }
+            
+            console.log(`واکنش با موفقیت در bin ${i} ذخیره شد`);
+            
+          } catch (error) {
+            console.error(`خطا در ذخیره واکنش در bin ${i}:`, error);
+            // ادامه به bin بعدی در صورت خطا
+          }
+        }
+        
+        // بارگذاری مجدد نظرات
+        await loadComments();
+        
+      } catch (error) {
+        console.error('خطا در ثبت واکنش:', error);
+        showNotification('خطا در ثبت واکنش. لطفاً دوباره تلاش کنید.');
+      }
+    }
+    
+    // تابع برای نمایش خطا در نظرات
+    function showCommentError(message) {
+      errorMessage.textContent = message;
+      errorMessage.style.display = 'block';
+      successMessage.style.display = 'none';
+      
+      // مخفی کردن خودکار پیام خطا پس از ۵ ثانیه
+      setTimeout(() => {
+        errorMessage.style.display = 'none';
+      }, 5000);
+    }
+    
+    // تابع برای نمایش موفقیت در نظرات
+    function showCommentSuccess(message) {
+      successMessage.textContent = message;
+      successMessage.style.display = 'block';
+      errorMessage.style.display = 'none';
+      
+      // مخفی کردن خودکار پیام موفقیت پس از ۵ ثانیه
+      setTimeout(() => {
+        successMessage.style.display = 'none';
+      }, 5000);
+    }
+    
+    // تابع برای نمایش نظرات
+    function displayComments(comments) {
+      if (comments.length === 0) {
+        commentsList.innerHTML = 
+          `<div class="empty-comments">
+              <i class="far fa-comments"></i>
+              <p>هنوز نظری ارسال نشده است. اولین نفری باشید که نظر می‌دهد!</p>
+            </div>`;
+        return;
+      }
+      
+      // گروه‌بندی نظرات بر اساس parentId
+      const commentMap = {};
+      comments.forEach(comment => {
+        comment.replies = [];
+        commentMap[comment.id] = comment;
+      });
+      
+      const rootComments = [];
+      comments.forEach(comment => {
+        if (comment.parentId) {
+          if (commentMap[comment.parentId]) {
+            commentMap[comment.parentId].replies.push(comment);
+          }
+        } else {
+          rootComments.push(comment);
+        }
+      });
+      
+      // تولید HTML برای نظرات
+      commentsList.innerHTML = rootComments.map(comment => 
+        renderComment(comment, 0)
+      ).join('');
+    }
+    
+    // تابع برای رندر کردن یک نظر و پاسخ‌هایش
+    function renderComment(comment, depth) {
+      const indent = depth * 30;
+      const userReaction = userReactions[comment.id];
+      
+      // تولید HTML برای واکنش‌ها
+      let reactionsHTML = '';
+      if (comment.reactions && Object.keys(comment.reactions).length > 0) {
+        reactionsHTML = `
+            <div class="reactions-container">
+              ${Object.entries(comment.reactions)
+                .filter(([_, count]) => count > 0)
+                .map(([emoji, count]) => `
+                  <div class="reaction-btn ${userReaction === emoji ? 'active' : ''}">
+                    <span class="reaction-emoji">${emoji}</span>
+                    <span class="reaction-count">${count}</span>
+                  </div>
+                `).join('')}
+            </div>`;
+      }
+      
+      // تولید HTML برای پنل انتخاب ایموجی
+      const emojiPickerHTML = `
+          <div class="emoji-picker">
+            ${availableEmojis.map(emoji => `
+              <span class="emoji-option" onclick="addReaction(${comment.id}, '${emoji}')">${emoji}</span>
+            `).join('')}
+          </div>`;
+      
+      // تولید HTML برای فایل پیوست شده (اگر وجود دارد)
+      let fileHTML = '';
+      if (comment.file) {
+        const fileType = getFileType(comment.fileType);
+        
+        if (fileType === 'image') {
+          // نمایش تصویر
+          fileHTML = `
+              <div class="file-preview-container">
+                <img src="${comment.file}" alt="${comment.fileName}" class="comment-attachment">
+                <div class="file-preview-name">${escapeHtml(comment.fileName)}</div>
+                <a href="${comment.file}" download="${comment.fileName}" class="file-download-btn">
+                  <i class="fas fa-download"></i> دانلود
+                </a>
+              </div>`;
+        } else if (fileType === 'video') {
+          // نمایش ویدئو با قابلیت پخش خودکار و حلقه‌ای
+          fileHTML = `
+              <div class="file-preview-container">
+                <video class="comment-video" controls autoplay loop muted>
+                  <source src="${comment.file}" type="${comment.fileType}">
+                  مرورگر شما از نمایش ویدئو پشتیبانی نمی‌کند.
+                </video>
+                <div class="file-preview-name">${escapeHtml(comment.fileName)}</div>
+                <a href="${comment.file}" download="${comment.fileName}" class="file-download-btn">
+                  <i class="fas fa-download"></i> دانلود
+                </a>
+              </div>`;
+        } else {
+          // نمایش لینک دانلود برای سایر انواع فایل
+          const fileIcon = fileTypeIcons[fileType] || fileTypeIcons.default;
+          fileHTML = `
+              <div class="file-preview-container">
+                <i class="${fileIcon} file-preview-icon"></i>
+                <div class="file-preview-name">${escapeHtml(comment.fileName)}</div>
+                <a href="${comment.file}" download="${comment.fileName}" class="file-download-btn">
+                  <i class="fas fa-download"></i> دانلود
+                </a>
+              </div>`;
+        }
+      }
+      
+      return `
+      <div class="comment" style="margin-left: ${indent}px;">
+        <div class="comment-header">
+          <span class="comment-name">${escapeHtml(comment.name)}</span>
+          <span class="comment-date">${formatDate(comment.timestamp)}</span>
+        </div>
+        <p class="comment-content">${escapeHtml(comment.comment)}</p>
+        ${fileHTML}
+        ${reactionsHTML}
+        <div class="comment-actions">
+          <button class="reply-btn" onclick="replyToComment(${comment.id}, '${escapeHtml(comment.name)}')">
+            <i class="fas fa-reply"></i> پاسخ
+          </button>
+          <button class="btn btn-secondary" onclick="this.nextElementSibling.style.display='block'">
+            <i class="fas fa-smile"></i> واکنش
+          </button>
+          <div style="display: none;">${emojiPickerHTML}</div>
+        </div>
+        ${comment.replies && comment.replies.length > 0 ? 
+          comment.replies.map(reply => renderComment(reply, depth + 1)).join('') : ''}
+      </div>`;
+    }
+    
+    // تابع برای ایمن‌سازی HTML
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    // تابع برای فرمت تاریخ
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat('fa-IR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(date);
+    }
+    
+    // بارگذاری اولیه نظرات از تمام binها
+    async function loadComments() {
+      try {
+        let allComments = [];
+        let successfulLoads = 0;
+        
+        // تلاش برای بارگذاری از تمام binها
+        for (let i = 0; i < binConfigs.length; i++) {
+          try {
+            const config = binConfigs[i];
+            if (!config.binId || !config.apiKey) continue;
+            
+            const apiUrl = `https://api.jsonbin.io/v3/b/${config.binId}`;
+            
+            const response = await fetch(apiUrl, {
+              headers: {
+                'X-Master-Key': config.apiKey
+              }
+            });
+            
+            if (!response.ok) {
+              throw new Error('خطا در دریافت نظرات');
+            }
+            
+            const data = await response.json();
+            const comments = data.record?.comments || [];
+            
+            // اضافه کردن نظرات به لیست کلی
+            allComments = [...allComments, ...comments];
+            successfulLoads++;
+            
+          } catch (error) {
+            console.error(`خطا در بارگذاری از bin ${i}:`, error);
+            // ادامه به bin بعدی در صورت خطا
+          }
+        }
+        
+        if (successfulLoads === 0) {
+          throw new Error('هیچ یک از binها در دسترس نیستند');
+        }
+        
+        // حذف نظرات تکراری بر اساس ID
+        const uniqueComments = allComments.filter((comment, index, self) =>
+          index === self.findIndex(c => c.id === comment.id)
+        );
+        
+        // مرتب‌سازی نظرات بر اساس تاریخ (جدیدترین اول)
+        uniqueComments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        
+        commentsData = uniqueComments;
+        displayComments(commentsData);
+        
+      } catch (error) {
+        commentsList.innerHTML = 
+          `<div class="error">
+              خطا در بارگذاری نظرات: ${error.message}
+            </div>`;
+      }
+    }
+    
+    // ایجاد قلب‌های نئونی هنگام بارگذاری صفحه
+    window.addEventListener('load', function() {
+      createHearts();
+      loadComments();
+    });
+</script>
+  </body>
+</html>
